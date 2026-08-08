@@ -1,0 +1,3 @@
+[submodule "client-gateway"]
+	path = client-gateway
+	url = https://github.com/Movu-Movie-Reviews-App/movu-client-gateway.git
