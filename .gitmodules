@@ -1,3 +1,12 @@
 [submodule "client-gateway"]
 	path = client-gateway
 	url = https://github.com/Movu-Movie-Reviews-App/movu-client-gateway.git
+[submodule "review-service"]
+	path = review-service
+	url = https://github.com/Movu-Movie-Reviews-App/movu-review-service.git
+[submodule "user-service"]
+	path = user-service
+	url = https://github.com/Movu-Movie-Reviews-App/movu-user-service.git
+[submodule "content-service"]
+	path = content-service
+	url = https://github.com/Movu-Movie-Reviews-App/movu-content-service.git
