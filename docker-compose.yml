@@ -6,6 +6,8 @@ services:
       - "8222:8222"
 
   client-gateway:
+    depends_on:
+      - nats-server
     build: ./client-gateway
     ports:
       - "${CLIENT_GATEWAY_PORT}:3000"
@@ -15,26 +17,29 @@ services:
     environment:
       - PORT=3000
       - NATS_SERVERS=${NATS_SERVERS}
+      - CORS_ORIGINS=${CORS_ORIGINS}
+
   user-db:
     image: postgres:14.3
     container_name: ${USER_DB_NAME}
     restart: always
     ports:
-      - 5440:${DB_PORT}"
-
+      - "5440:${DB_PORT}"
     volumes:
       - user-db-data:/var/lib/postgresql/data
     environment:
       POSTGRES_DB: ${USER_DB_NAME}
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
-    
+
   user-service:
     depends_on:
       - user-db
+      - nats-server
     build: ./user-service
     volumes:
       - ./user-service/src:/usr/src/app/src
+    command: npm run start:dev
     environment:
       - PORT=3000
       - NATS_SERVERS=${NATS_SERVERS}
@@ -43,4 +48,108 @@ services:
       - DB_PORT=${DB_PORT}
       - DB_USERNAME=${DB_USERNAME}
       - DB_PASSWORD=${DB_PASSWORD}
-      - USER_DB_PORT=${USER_DB_PORT}
+      - USER_DB_PORT=${DB_PORT}
+
+  auth-db:
+    image: postgres:14.3
+    container_name: ${AUTH_DB_NAME}
+    restart: always
+    ports:
+      - "5441:${DB_PORT}"
+    volumes:
+      - auth-db-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${AUTH_DB_NAME}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+
+  auth-service:
+    depends_on:
+      - auth-db
+      - nats-server
+    build: ./auth-service
+    volumes:
+      - ./auth-service/src:/usr/src/app/src
+    command: npm run start:dev
+    environment:
+      - PORT=3000
+      - NATS_SERVERS=${NATS_SERVERS}
+      - DB_HOST=auth-db
+      - AUTH_DB_NAME=${AUTH_DB_NAME}
+      - DB_PORT=${DB_PORT}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - AUTH_DB_PORT=${DB_PORT}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
+
+  content-db:
+    image: postgres:14.3
+    container_name: ${CONTENT_DB_NAME}
+    restart: always
+    ports:
+      - "5442:${DB_PORT}"
+    volumes:
+      - content-db-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${CONTENT_DB_NAME}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+
+  content-service:
+    depends_on:
+      - content-db
+      - nats-server
+    build: ./content-service
+    volumes:
+      - ./content-service/src:/usr/src/app/src
+    command: npm run start:dev
+    environment:
+      - PORT=3000
+      - NATS_SERVERS=${NATS_SERVERS}
+      - DB_HOST=content-db
+      - CONTENT_DB_NAME=${CONTENT_DB_NAME}
+      - DB_PORT=${DB_PORT}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - CONTENT_DB_PORT=${DB_PORT}
+      - ENVIRONMENT=${ENVIRONMENT}
+      - TMDB_API_KEY=${TMDB_API_KEY}
+      - MOVIES_MAX_TOTAL_FETCH_PAGES=${MOVIES_MAX_TOTAL_FETCH_PAGES}
+
+  review-db:
+    image: postgres:14.3
+    container_name: ${REVIEW_DB_NAME}
+    restart: always
+    ports:
+      - "5443:${DB_PORT}"
+    volumes:
+      - review-db-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${REVIEW_DB_NAME}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+
+  review-service:
+    depends_on:
+      - review-db
+      - nats-server
+    build: ./review-service
+    volumes:
+      - ./review-service/src:/usr/src/app/src
+    command: npm run start:dev
+    environment:
+      - PORT=3000
+      - NATS_SERVERS=${NATS_SERVERS}
+      - DB_HOST=review-db
+      - REVIEW_DB_NAME=${REVIEW_DB_NAME}
+      - DB_PORT=${DB_PORT}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - REVIEW_DB_PORT=${DB_PORT}
+
+volumes:
+  user-db-data:
+  auth-db-data:
+  content-db-data:
+  review-db-data:
