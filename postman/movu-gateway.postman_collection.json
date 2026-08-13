@@ -1,0 +1,432 @@
+{
+  "info": {
+    "name": "Movu Client Gateway",
+    "description": "Endpoints exposed by client-gateway. Only Auth and Users are wired into AppModule right now (see client-gateway/src/app.module.ts) — Content, Movie, Series, Genres, Review, Favorite, Wishlist and Tmdb-Sync folders exist in the codebase but will 404 until their modules are imported there.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }]
+  },
+  "variable": [
+    { "key": "gatewayUrl", "value": "http://localhost:3010/api" },
+    { "key": "authToken", "value": "" },
+    { "key": "userId", "value": "" },
+    { "key": "contentId", "value": "" },
+    { "key": "reviewId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@movu.dev\",\n  \"password\": \"Test1234!\",\n  \"userName\": \"testuser\"\n}"
+            },
+            "url": { "raw": "{{gatewayUrl}}/auth/register", "host": ["{{gatewayUrl}}"], "path": ["auth", "register"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201 || pm.response.code === 200) {",
+                  "    const body = pm.response.json();",
+                  "    if (body.token) pm.collectionVariables.set('authToken', body.token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@movu.dev\",\n  \"password\": \"Test1234!\"\n}"
+            },
+            "url": { "raw": "{{gatewayUrl}}/auth/login", "host": ["{{gatewayUrl}}"], "path": ["auth", "login"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    const body = pm.response.json();",
+                  "    if (body.token) pm.collectionVariables.set('authToken', body.token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Find All",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": { "raw": "{{gatewayUrl}}/users", "host": ["{{gatewayUrl}}"], "path": ["users"] }
+          }
+        },
+        {
+          "name": "Find One",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": { "raw": "{{gatewayUrl}}/users/{{userId}}", "host": ["{{gatewayUrl}}"], "path": ["users", "{{userId}}"] }
+          }
+        },
+        {
+          "name": "Create",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"testuser\",\n  \"avatarUrl\": \"\"\n}"
+            },
+            "url": { "raw": "{{gatewayUrl}}/users", "host": ["{{gatewayUrl}}"], "path": ["users"] }
+          }
+        },
+        {
+          "name": "Update",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"updateduser\"\n}"
+            },
+            "url": { "raw": "{{gatewayUrl}}/users/{{userId}}", "host": ["{{gatewayUrl}}"], "path": ["users", "{{userId}}"] }
+          }
+        },
+        {
+          "name": "Delete",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{gatewayUrl}}/users/{{userId}}", "host": ["{{gatewayUrl}}"], "path": ["users", "{{userId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Content [not wired yet]",
+      "item": [
+        {
+          "name": "Find All",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": {
+              "raw": "{{gatewayUrl}}/content?limit=10&page=1&contentType=MOVIE",
+              "host": ["{{gatewayUrl}}"],
+              "path": ["content"],
+              "query": [
+                { "key": "limit", "value": "10" },
+                { "key": "page", "value": "1" },
+                { "key": "contentType", "value": "MOVIE" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": {
+              "raw": "{{gatewayUrl}}/content/search?search=matrix",
+              "host": ["{{gatewayUrl}}"],
+              "path": ["content", "search"],
+              "query": [{ "key": "search", "value": "matrix" }]
+            }
+          }
+        },
+        {
+          "name": "Top Rated This Week",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{gatewayUrl}}/content/top-rated-week", "host": ["{{gatewayUrl}}"], "path": ["content", "top-rated-week"] }
+          }
+        },
+        {
+          "name": "Home Content",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{gatewayUrl}}/content/home?contentType=MOVIE",
+              "host": ["{{gatewayUrl}}"],
+              "path": ["content", "home"],
+              "query": [{ "key": "contentType", "value": "MOVIE" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Movies [not wired yet]",
+      "item": [
+        {
+          "name": "Find Details",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{gatewayUrl}}/{{contentId}}", "host": ["{{gatewayUrl}}"], "path": ["{{contentId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Series [not wired yet]",
+      "item": [
+        {
+          "name": "Find Details",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{gatewayUrl}}/series/{{contentId}}", "host": ["{{gatewayUrl}}"], "path": ["series", "{{contentId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Genres [not wired yet]",
+      "item": [
+        {
+          "name": "Find All By Content Type",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": {
+              "raw": "{{gatewayUrl}}/genres?contentType=MOVIE",
+              "host": ["{{gatewayUrl}}"],
+              "path": ["genres"],
+              "query": [{ "key": "contentType", "value": "MOVIE" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Review [not wired yet]",
+      "item": [
+        {
+          "name": "Find By Content",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": {
+              "raw": "{{gatewayUrl}}/review/{{contentId}}?limit=10&page=1",
+              "host": ["{{gatewayUrl}}"],
+              "path": ["review", "{{contentId}}"],
+              "query": [
+                { "key": "limit", "value": "10" },
+                { "key": "page", "value": "1" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Find My Review",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{gatewayUrl}}/review/{{contentId}}/my-review", "host": ["{{gatewayUrl}}"], "path": ["review", "{{contentId}}", "my-review"] }
+          }
+        },
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Great movie\",\n  \"description\": \"Really enjoyed the pacing and the cast.\",\n  \"rating\": 5,\n  \"contentId\": \"{{contentId}}\"\n}"
+            },
+            "url": { "raw": "{{gatewayUrl}}/review", "host": ["{{gatewayUrl}}"], "path": ["review"] }
+          }
+        },
+        {
+          "name": "Update",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rating\": 4\n}"
+            },
+            "url": { "raw": "{{gatewayUrl}}/review/{{reviewId}}", "host": ["{{gatewayUrl}}"], "path": ["review", "{{reviewId}}"] }
+          }
+        },
+        {
+          "name": "Delete",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{gatewayUrl}}/review/{{reviewId}}", "host": ["{{gatewayUrl}}"], "path": ["review", "{{reviewId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Favorite [not wired yet]",
+      "item": [
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"contentId\": \"{{contentId}}\"\n}" },
+            "url": { "raw": "{{gatewayUrl}}/favorite", "host": ["{{gatewayUrl}}"], "path": ["favorite"] }
+          }
+        },
+        {
+          "name": "Find All By User",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{gatewayUrl}}/favorite", "host": ["{{gatewayUrl}}"], "path": ["favorite"] }
+          }
+        },
+        {
+          "name": "Find One",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{gatewayUrl}}/favorite/{{contentId}}", "host": ["{{gatewayUrl}}"], "path": ["favorite", "{{contentId}}"] }
+          }
+        },
+        {
+          "name": "Delete",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{gatewayUrl}}/favorite/{{contentId}}", "host": ["{{gatewayUrl}}"], "path": ["favorite", "{{contentId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Wishlist [not wired yet]",
+      "item": [
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"contentId\": \"{{contentId}}\"\n}" },
+            "url": { "raw": "{{gatewayUrl}}/wishlist", "host": ["{{gatewayUrl}}"], "path": ["wishlist"] }
+          }
+        },
+        {
+          "name": "Find All By User",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{gatewayUrl}}/wishlist", "host": ["{{gatewayUrl}}"], "path": ["wishlist"] }
+          }
+        },
+        {
+          "name": "Find One",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{gatewayUrl}}/wishlist/{{contentId}}", "host": ["{{gatewayUrl}}"], "path": ["wishlist", "{{contentId}}"] }
+          }
+        },
+        {
+          "name": "Delete",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{gatewayUrl}}/wishlist/{{contentId}}", "host": ["{{gatewayUrl}}"], "path": ["wishlist", "{{contentId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tmdb Sync [not wired yet]",
+      "item": [
+        {
+          "name": "Sync All",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "url": {
+              "raw": "{{gatewayUrl}}/tmdb-sync?limit=10&page=1",
+              "host": ["{{gatewayUrl}}"],
+              "path": ["tmdb-sync"],
+              "query": [
+                { "key": "limit", "value": "10" },
+                { "key": "page", "value": "1" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Sync Movie Genres",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "url": { "raw": "{{gatewayUrl}}/tmdb-sync/movie-genres", "host": ["{{gatewayUrl}}"], "path": ["tmdb-sync", "movie-genres"] }
+          }
+        },
+        {
+          "name": "Sync Series Genres",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "url": { "raw": "{{gatewayUrl}}/tmdb-sync/series-genres", "host": ["{{gatewayUrl}}"], "path": ["tmdb-sync", "series-genres"] }
+          }
+        },
+        {
+          "name": "Sync Popular Movies",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "url": {
+              "raw": "{{gatewayUrl}}/tmdb-sync/popular-movies?limit=10&page=1",
+              "host": ["{{gatewayUrl}}"],
+              "path": ["tmdb-sync", "popular-movies"],
+              "query": [
+                { "key": "limit", "value": "10" },
+                { "key": "page", "value": "1" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Sync Popular Series",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "url": {
+              "raw": "{{gatewayUrl}}/tmdb-sync/popular-series?limit=10&page=1",
+              "host": ["{{gatewayUrl}}"],
+              "path": ["tmdb-sync", "popular-series"],
+              "query": [
+                { "key": "limit", "value": "10" },
+                { "key": "page", "value": "1" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Clear Synced Data",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": { "raw": "{{gatewayUrl}}/tmdb-sync/clear", "host": ["{{gatewayUrl}}"], "path": ["tmdb-sync", "clear"] }
+          }
+        }
+      ]
+    }
+  ]
+}

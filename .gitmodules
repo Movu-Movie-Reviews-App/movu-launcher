@@ -10,3 +10,6 @@
 [submodule "content-service"]
 	path = content-service
 	url = https://github.com/Movu-Movie-Reviews-App/movu-content-service.git
+[submodule "auth-service"]
+	path = auth-service
+	url = https://github.com/Movu-Movie-Reviews-App/movu-auth-service.git
