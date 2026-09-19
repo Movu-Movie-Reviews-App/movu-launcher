@@ -148,8 +148,43 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - REVIEW_DB_PORT=${DB_PORT}
 
+  media-db:
+    image: postgres:14.3
+    container_name: ${MEDIA_DB_NAME}
+    restart: always
+    ports:
+      - "5444:${DB_PORT}"
+    volumes:
+      - media-db-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${MEDIA_DB_NAME}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+
+  media-service:
+    depends_on:
+      - media-db
+      - nats-server
+    build: ./media-service
+    volumes:
+      - ./media-service/src:/usr/src/app/src
+    command: npm run start:dev
+    environment:
+      - PORT=3000
+      - NATS_SERVERS=${NATS_SERVERS}
+      - DB_HOST=media-db
+      - DB_NAME=${MEDIA_DB_NAME}
+      - DB_PORT=${DB_PORT}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - AWS_REGION=${AWS_REGION}
+      - AWS_BUCKET_NAME=${AWS_BUCKET_NAME}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+
 volumes:
   user-db-data:
   auth-db-data:
   content-db-data:
   review-db-data:
+  media-db-data:
